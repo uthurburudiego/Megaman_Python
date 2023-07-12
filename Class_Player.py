@@ -1,5 +1,6 @@
 
 import pygame
+from Class_Disparos import Disparos
 
 
 class Player():
@@ -7,37 +8,38 @@ class Player():
 
         self.reiniciar(x, y, screen, animaciones)
 
-    def update(self, mundo, grupo_enemigos, grupo_trampas, grupo_items):
+    def update(self, mundo, grupo_enemigos, grupo_trampas, grupo_items, grupo_disparos, grupo_disparos_boss):
         delta_x = 0
         delta_y = 0
 
         self.animar()
         # get keypresses
-        delta_x = self.mover(delta_x)
+        delta_x = self.mover(delta_x, grupo_disparos)
 
         # add gravity
         delta_y = self.gravedad(delta_y)
 
         # # verificar colisiones
-        for tile in mundo.lista_cuadricula:
+        for cuadrado in mundo.lista_cuadricula:
            # verificar colision en x
-            if tile[1].colliderect(self.rect.x + delta_x, self.rect.y, self.width, self.height):
+            if cuadrado[1].colliderect(self.rect.x + delta_x, self.rect.y, self.width, self.height):
                 delta_x = 0
             # verificar colision en y
-            if tile[1].colliderect(self.rect.x, self.rect.y + delta_y, self.width, self.height):
+            if cuadrado[1].colliderect(self.rect.x, self.rect.y + delta_y, self.width, self.height):
                 # verificar si está debajo del suelo
                 if self.velocidad_y < 0:
-                    delta_y = tile[1].bottom - self.rect.top
+                    delta_y = cuadrado[1].bottom - self.rect.top
                     self.velocidad_y = 0
                 # comprobar si está por encima del suelo
                 elif self.velocidad_y >= 0:
-                    delta_y = tile[1].top - self.rect.bottom
+                    delta_y = cuadrado[1].top - self.rect.bottom
                     self.velocidad_y = 0
                     self.esta_cayendo = False
 
         # verificar colisiones con enemigos
-            if (self.cooldown_vidas > 3000 and (pygame.sprite.spritecollide(self, grupo_enemigos, False)
-                                                or pygame.sprite.spritecollide(self, grupo_trampas, False))):
+            if (self.cooldown_vidas > 3000 and (pygame.sprite.spritecollide(self, grupo_enemigos, False) or
+                                                pygame.sprite.spritecollide(self, grupo_trampas, False) or
+                                                pygame.sprite.spritecollide(self, grupo_disparos_boss, False))):
                 self.que_animacion = "daño"
                 self.recibiendo_daño = True
                 self.vidas -= 1
@@ -76,10 +78,10 @@ class Player():
             self.cooldown_frames = 0
         self.cooldown_frames += 1
 
-    def mover(self, delta_x):
-
+    def mover(self, delta_x, grupo_disparos):
         key = pygame.key.get_pressed()
-        if key[pygame.K_SPACE] and self.esta_cayendo == False:
+
+        if key[pygame.K_UP] and self.esta_cayendo == False:
             self.velocidad_y = -15
             self.esta_cayendo = True
             self.que_animacion = "salto"
@@ -95,6 +97,12 @@ class Player():
             self.direction = 1
             self.que_animacion = "movimiento_adelante"
             self.recibiendo_daño = False
+        elif key[pygame.K_SPACE] and self.direction == 1:
+            self.que_animacion = 'ataque_derecha'
+            self.disparo(grupo_disparos)
+        elif key[pygame.K_SPACE] and self.direction == -1:
+            self.que_animacion = 'ataque_izquierda'
+            self.disparo(grupo_disparos)
         elif self.direction == 1 and not self.esta_cayendo and not self.recibiendo_daño:
             self.que_animacion = 'quieto_derecha'
         elif self.direction == -1 and not self.esta_cayendo and not self.recibiendo_daño:
@@ -133,3 +141,15 @@ class Player():
         self.cooldown_vidas = 0
         self.vidas = 3
         self.recibiendo_daño = False
+        self.exit = False
+        self.llaves = 0
+
+        self.cooldown_disparos = 0
+
+    def disparo(self, grupo_disparos):
+        if self.cooldown_disparos > 8:
+            bala = Disparos(self.rect.x + self.width * self.direction,
+                            self.rect.y + self.height/2, self.screen, self.direction, pygame.image.load("Recursos/Img/Proyectiles/1.png"))
+            grupo_disparos.add(bala)
+            self.cooldown_disparos = 0
+        self.cooldown_disparos += 1

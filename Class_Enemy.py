@@ -1,5 +1,7 @@
-from typing import Any
+
 import pygame
+from Class_Disparos import Disparos
+from Class_Player import Player
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -24,7 +26,7 @@ class Enemy(pygame.sprite.Sprite):
         self.direction = 0
         self.contador_movimiento = 0
 
-    def update(self, mundo) -> None:
+    def update(self, mundo, grupo_disparos) -> None:
 
         self.move_enemy()
         self.animar()
@@ -54,6 +56,9 @@ class Enemy(pygame.sprite.Sprite):
                     self.velocidad_y = 0
                     self.esta_cayendo = False
 
+        if pygame.sprite.spritecollide(self, grupo_disparos, True):
+            self.kill()
+
         # Actualizar coordenadas del enemigo
         self.rect.x += delta_x
         self.rect.y += delta_y
@@ -80,3 +85,68 @@ class Enemy(pygame.sprite.Sprite):
             self.index += 1
             self.cooldown = 0
         self.cooldown += 1
+
+
+class Boss(pygame.sprite.Sprite):
+    def __init__(self, x, y, screen, animacion) -> None:
+        pygame.sprite.Sprite.__init__(self)
+        self.screen = screen
+        self.animacion = animacion
+        self.index = 0
+        self.cooldown = 0
+        self.image = self.animacion[self.index]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.mover_direccion = 1
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
+        self.velocidad_y = 0
+        self.velocidad_x = 5
+        self.direction = 1
+        self.cooldown_disparos = 0
+        self.contador_movimiento = 0
+        self.vida_enemigo = 20
+
+    def update(self, mundo, grupo_disparos, jugador: Player, grupo_disparos_boss) -> None:
+        print(self.vida_enemigo)
+
+        if pygame.sprite.spritecollide(self, grupo_disparos, True):
+
+            self.vida_enemigo -= 1
+
+        if self.vida_enemigo <= 0:
+            jugador.llaves = 3
+            self.kill()
+
+        self.disparo(grupo_disparos_boss)
+        self.move_enemy()
+        self .animar()
+
+    def animar(self):
+        if self.index >= len(self.animacion):
+            self.index = 0
+
+        if self.cooldown > 3:
+            self.image = self.animacion[self.index]
+            self.index += 1
+            self.cooldown = 0
+        self.cooldown += 1
+
+    def move_enemy(self):
+        self.rect.x += self.mover_direccion
+        self.rect.y += self.mover_direccion
+
+        self.contador_movimiento += 1
+        if abs(self.contador_movimiento) > 50:
+
+            self.mover_direccion *= -1
+            self.contador_movimiento *= -1
+
+    def disparo(self, grupo_disparos):
+        if self.cooldown_disparos > 40:
+            bala = Disparos(self.rect.x + self.width * self.direction,
+                            self.rect.y + self.height/2 + 30, self.screen, self.direction, pygame.image.load("Recursos\Img\Enemys\Boss\disparo.png"))
+            grupo_disparos.add(bala)
+            self.cooldown_disparos = 0
+        self.cooldown_disparos += 1

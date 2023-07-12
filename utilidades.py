@@ -129,6 +129,7 @@ def cargar_imagenes_enemigo():
         'muerto': personaje_muerto
     }
 
+
 def cargar_imagenes_items():
     item = [
         pygame.image.load("Recursos/Img/Items/vida (1).png"),
@@ -140,3 +141,43 @@ def cargar_imagenes_items():
         pygame.image.load("Recursos/Img/Items/vida (7).png")
     ]
     return item
+
+
+def cargar_imagenes_lampara():
+    salida = [
+        pygame.image.load("Recursos\Img\Items\salida (1).png"),
+        pygame.image.load("Recursos\Img\Items\salida (2).png"),
+        pygame.image.load("Recursos\Img\Items\salida (3).png"),
+
+    ]
+    saliendo = [
+        pygame.image.load("Recursos\Img\Items\salida (4).png"),
+        pygame.image.load("Recursos\Img\Items\salida (5).png"),
+    ]
+    return{
+        'salida': salida,
+        'saliendo': saliendo
+    }
+
+
+def cargar_imagenes_salida():
+    salida = [
+        pygame.image.load("Recursos\Img\Maps\door_1.png"),
+        pygame.image.load("Recursos\Img\Maps\door_2.png"),
+        pygame.image.load("Recursos\Img\Maps\door_3.png"),
+        pygame.image.load("Recursos\Img\Maps\door_4.png"),
+        pygame.image.load("Recursos\Img\Maps\door_5.png"),
+    ]
+    return salida
+
+
+def cargar_imagenes_boss():
+    boss = [
+        pygame.image.load("Recursos/Img/Enemys/Boss/boss_01.png"),
+        pygame.image.load("Recursos/Img/Enemys/Boss/boss_02.png"),
+        pygame.image.load("Recursos/Img/Enemys/Boss/boss_03.png"),
+        pygame.image.load("Recursos/Img/Enemys/Boss/boss_04.png"),
+        pygame.image.load("Recursos/Img/Enemys/Boss/boss_05.png"),
+    ]
+    boss = girar_imagenes(boss, True, False)
+    return boss
