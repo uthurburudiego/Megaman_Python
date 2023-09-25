@@ -9,6 +9,7 @@ from Clases.Class_Items import*
 from Clases.Class_Obstaculos import*
 from Clases.Class_Menu import*
 from Clases.Class_Opciones import*
+from Clases.Class_Setings import*
 from pygame import mixer
 
 # Constantes para el tipo de cuadricula
@@ -54,13 +55,15 @@ class Mundo():
         self.height = self.screen.get_height()
         self.menu = Menu(self.screen)
         self.opciones = Opciones(self.screen)
+        self.setings = Setings(self.screen)
+        self.volumen = 0.1
         self.jugador = Player(100, self.height - 100,
                               self.screen, animaciones_jugador)
 
         # Sonidos
         self.sonido_ambiente = pygame.mixer.Sound(
             "Recursos\Songs\megaman-1.mp3")
-        self.sonido_ambiente.set_volume(0.2)
+        self.sonido_ambiente.set_volume(self.volumen)
 
         # buttons
         self.restart_button = Button(self.width // 2 - 50, self.height // 2 - 100,
@@ -99,17 +102,37 @@ class Mundo():
                 self.menu.draw()
 
             # aca va a estar el menu
-            if self.menu.inicio_button.clicked:  # ENTRAR AL JUEGO
-                self.menu.start_menu = False
-            if self.menu.exit_button.clicked:  # CERRAR EL JUEGO
-                run = False
-            if self.menu.option_button.clicked:
+            if self.menu.inicio_button.clicked:
+                self.menu.start_menu = False  # ENTRAR AL JUEGO
+            if self.menu.exit_button.clicked:
+                run = False  # CERRAR EL JUEGO
+            if self.menu.option_button.clicked:  # ABRE OPCIONES
                 self.opciones.start_menu = True
                 if self.menu.start_menu:
-                    self.opciones.draw()
-            if self.opciones.back_button.clicked:
+                    if not self.setings.start_menu:
+                        self.opciones.draw()
+                if self.opciones.setings_button.clicked:
+                    self.setings.start_menu = True  # ABRE SETINGS
+                    self.setings.draw()
+                    if self.setings.sonido_button.clicked:
+                        # Prendemos musica de fondo
+                        self.sonido_ambiente.play(-1)
+                    if self.setings.stop_sonido_button.clicked:
+                        self.sonido_ambiente.stop()  # Paramos musica de fondo
+                    if self.setings.volumen_mas_button.clicked:
+                        if self.setings.index <= 5:
+                            self.setings.index += 1
+                            self.volumen += 0.1
+                    if self.setings.volumen_menos_button.clicked:
+                        if self.setings.index >= 0:
+                            self.setings.index -= 1
+                            self.volumen -= 0.1
+                    if self.setings.inicio_button.clicked:
+                        self.setings.start_menu = False
+                self.sonido_ambiente.set_volume(self.volumen)
+
+            if self.opciones.back_button.clicked:  # Aca se cierran
                 self.opciones.start_menu = False
-                self.menu.start_menu = True
 
         return run
 

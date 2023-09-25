@@ -9,20 +9,24 @@ class Button():
         self.rect.x = x
         self.rect.y = y
         self.clicked = False
+        self.prev_click = False  # Variable para almacenar el estado previo del clic
 
     def draw(self):
         action = False
         posicion_mouse = pygame.mouse.get_pos()
+        mouse_click = pygame.mouse.get_pressed()[0]
 
-        # aca preguntamos por si el mouse se posiciono en el rectangulo
+        # Verificar si el mouse se posicionó en el rectángulo
         if self.rect.collidepoint(posicion_mouse):
-            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+            if mouse_click and not self.prev_click:
                 action = True
                 self.clicked = True
-
-        if pygame.mouse.get_pressed()[0] == 0:
+            else:
+                self.clicked = False
+        else:
             self.clicked = False
 
+        self.prev_click = mouse_click  # Actualizar el estado previo del clic
         self.screen.blit(self.image, self.rect)
 
         return action

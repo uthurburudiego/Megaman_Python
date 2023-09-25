@@ -2,7 +2,7 @@ import pygame
 
 
 class Label:
-    def __init__(self, x, y, image, font, screen, text):
+    def __init__(self, x, y, image, font, screen, text=""):
         self.screen = screen
         self.image = image
         self.rect = self.image.get_rect()
