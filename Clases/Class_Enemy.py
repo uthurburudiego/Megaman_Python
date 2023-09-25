@@ -112,6 +112,7 @@ class Boss(pygame.sprite.Sprite):
             self.vida_enemigo -= 1
 
         if self.vida_enemigo <= 0:
+            jugador.score += 3000
             jugador.llaves = 3
             self.kill()
 

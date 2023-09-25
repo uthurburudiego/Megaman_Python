@@ -44,12 +44,14 @@ class Player():
                 self.sonido_muerte.play()
                 self.recibiendo_daño = True
                 self.vidas -= 1
+                self.score -= 50
                 self.cooldown_vidas = 0
             self.cooldown_vidas += 1
 
         # colision con items
         if pygame.sprite.spritecollide(self, grupo_items, True):
             self.vidas += 1
+            self.score += 100
 
         # Actualizar coordenadas del jugador
         self.rect.x += delta_x
@@ -83,7 +85,7 @@ class Player():
         key = pygame.key.get_pressed()
 
         if key[pygame.K_UP] and self.esta_cayendo == False:
-            self.sonido_salto.play(0,0,2)
+            self.sonido_salto.play(0, 0, 2)
             self.velocidad_y = -15
             self.esta_cayendo = True
             self.que_animacion = "salto"
@@ -142,10 +144,13 @@ class Player():
         self.direction = 0
 
         self.cooldown_vidas = 0
-        self.vidas = 3
+        self.vidas = 1
         self.recibiendo_daño = False
         self.exit = False
         self.llaves = 0
+        self.score = 0
+        self.time = 0
+        self.final_score = self.score + self.vidas * 500 - self.time *100
 
         self.cooldown_disparos = 0
 

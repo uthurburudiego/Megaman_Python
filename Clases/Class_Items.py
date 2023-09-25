@@ -53,6 +53,7 @@ class Lamps (pygame.sprite.Sprite):
             self.sonido_items.play()
             self.salida = True
             personaje.llaves += 1
+            personaje.score += 300
         if self.salida:
             self.que_animacion = "saliendo"
         else:

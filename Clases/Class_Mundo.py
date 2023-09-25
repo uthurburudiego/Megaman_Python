@@ -9,6 +9,7 @@ from Clases.Class_Items import*
 from Clases.Class_Obstaculos import*
 from Clases.Class_Menu import*
 from Clases.Class_Opciones import*
+from Clases.Class_Ranking import*
 from Clases.Class_Setings import*
 from pygame import mixer
 
@@ -56,9 +57,14 @@ class Mundo():
         self.menu = Menu(self.screen)
         self.opciones = Opciones(self.screen)
         self.setings = Setings(self.screen)
+        self.rating = Ranking(self.screen)
         self.volumen = 0.1
         self.jugador = Player(100, self.height - 100,
                               self.screen, animaciones_jugador)
+        self.fuente = pygame.font.Font("Recursos\Fuentes\GAMERIA.ttf", 36)
+        self.tiempo = 0
+        self.game_over = False
+        self.jugador_name = ""
 
         # Sonidos
         self.sonido_ambiente = pygame.mixer.Sound(
@@ -67,18 +73,30 @@ class Mundo():
 
         # buttons
         self.restart_button = Button(self.width // 2 - 50, self.height // 2 - 100,
-                                     pygame.image.load("Recursos/Img/Menu/btn_reiniciar.png"), self.screen)
+                                     pygame.image.load("Recursos/Img/Menu/btn_restart.png"), self.screen)
+
+        self.text_box = TextBox(self.width // 2 - 150,
+                                self.height // 2 - 50, 288, 84, 10)
 
         self.diseñar_mapa()
 
     def update(self):
         run = True
         key = key = pygame.key.get_pressed()
-
+        for event in pygame.event.get():
+            self.jugador_name = self.rating.text_box.handle_event(event)
         # Si no esta el menu abierto
-        if not self.menu.start_menu:
+        if not self.menu.start_menu and not self.game_over:
+            self.tiempo = int(pygame.time.get_ticks() / 1000)
+            self.jugador.time = self.tiempo
             self.draw()
             if self.jugador.vidas > 0:
+                mostrar_mensaje(
+                    self.screen, f"lives {self.jugador.vidas}", (80, 80), self.fuente)
+                mostrar_mensaje(
+                    self.screen, f"time {self.tiempo}", (self.width // 2, 80), self.fuente)
+                mostrar_mensaje(
+                    self.screen, f"score {self.jugador.score}", (self.width - 250, 80), self.fuente)
 
                 # Si pasa de Nivel
                 if self.jugador.exit:
@@ -90,11 +108,17 @@ class Mundo():
                 grupo_disparos.draw(self.screen)
                 grupo_disparos.update()
                 # Si el jugador pierde todas la vidas
-            elif self.restart_button.draw():
-
-                self.reiniciar_nivel()
-                self.jugador.reiniciar(
-                    100, self.height - 100, self.screen, animaciones_jugador)
+            elif self.rating.start_menu:
+                self.rating.draw()
+                if self.rating.reiniciar_button.clicked:
+                    self.rating.start_menu = False
+                    self.reiniciar_nivel()
+                    self.jugador.reiniciar(
+                        100, self.height - 100, self.screen, animaciones_jugador)
+                if self.rating.aceptar_button.clicked:
+                    with open("Recursos\Archivos\Puntajes.json", 'w') as archivo:
+                        json.dump(
+                            f"nombre: {self.jugador_name} - Score: {self.jugador.final_score}",archivo)
             # MENU DE OPCIONES
         if self.menu.start_menu or key[pygame.K_ESCAPE]:
             self.menu.start_menu = True
@@ -173,6 +197,7 @@ class Mundo():
         grupo_lamparas.empty()
         grupo_puerta.empty()
         self.lista_cuadricula.clear()
+        self.rating.start_menu = True
 
         self.diseñar_mapa()
         self.draw()
@@ -181,8 +206,18 @@ class Mundo():
         tamaño_cuadricula = 50
         contar_fila = 0
 
-        with open(f"Recursos/Archivos/Nivel_0{self.nivel}.json", "r") as archivo:
-            data = json.load(archivo)
+        try:
+            with open(f"Recursos/Archivos/Nivel_0{self.nivel}.json", "r") as archivo:
+                data = json.load(archivo)
+        except FileNotFoundError:
+            # Maneja la excepción si el archivo no existe
+            print(f"El archivo Nivel_0{self.nivel}.json no se encuentra.")
+        except json.JSONDecodeError as e:
+            # Maneja la excepción si hay un error en el formato JSON
+            print(f"Error en el formato JSON del archivo: {e}")
+        except Exception as e:
+            # Maneja cualquier otra excepción que pueda ocurrir
+            print(f"Ocurrió un error al cargar el archivo: {e}")
 
         for fila in data:
             contar_columna = 0

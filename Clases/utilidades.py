@@ -40,9 +40,9 @@ def obtener_rectangulos(principal) -> dict:
     return diccionario
 
 
-def mostrar_mensaje(screen, texto, posicion, fuente):
+def mostrar_mensaje(screen, texto, posicion, fuente, color =(255,255,255)):
     
-    mensaje = fuente.render(texto, True, (255, 255, 255))  # Renderiza el texto
+    mensaje = fuente.render(texto, True, color)  # Renderiza el texto
     screen.blit(mensaje, posicion)  # Muestra el mensaje en la pantalla
 
 
